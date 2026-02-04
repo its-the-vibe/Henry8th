@@ -21,11 +21,5 @@ FROM scratch
 # Copy the binary from builder
 COPY --from=builder /build/henry8th /henry8th
 
-# Copy the config file
-COPY config.yaml /config.yaml
-
-# Set the config path environment variable
-ENV CONFIG_PATH=/config.yaml
-
 # Run the service
 ENTRYPOINT ["/henry8th"]
