@@ -135,6 +135,7 @@ With `max_size: 10`, the service will keep only items 91-100 (the most recent), 
 ## Environment Variables
 
 - `CONFIG_PATH`: Path to configuration file (default: `config.yaml`)
+- `REDIS_PASSWORD`: Redis password (overrides the password in config file if set)
 
 ## Logging
 
