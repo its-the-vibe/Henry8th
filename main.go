@@ -15,23 +15,23 @@ import (
 
 // Config represents the configuration structure
 type Config struct {
-	Redis RedisConfig `yaml:"redis"`
-	Lists []ListConfig `yaml:"lists"`
-	PollInterval string `yaml:"poll_interval"`
+	Redis        RedisConfig  `yaml:"redis"`
+	Lists        []ListConfig `yaml:"lists"`
+	PollInterval string       `yaml:"poll_interval"`
 }
 
 // RedisConfig holds Redis connection settings
 type RedisConfig struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
 	Password string `yaml:"password"`
-	DB int `yaml:"db"`
+	DB       int    `yaml:"db"`
 }
 
 // ListConfig represents a single list to trim
 type ListConfig struct {
-	Name string `yaml:"name"`
-	MaxSize int64 `yaml:"max_size"`
+	Name    string `yaml:"name"`
+	MaxSize int64  `yaml:"max_size"`
 }
 
 func main() {
@@ -76,7 +76,7 @@ func main() {
 	defer ticker.Stop()
 
 	log.Printf("Starting list trimming service (poll interval: %s)", pollInterval)
-	
+
 	// Initial trim on startup
 	trimLists(ctx, rdb, config.Lists)
 
@@ -137,7 +137,7 @@ func trimList(ctx context.Context, rdb *redis.Client, listConfig ListConfig) err
 
 	// If list is within size limit, no trimming needed
 	if length <= listConfig.MaxSize {
-		log.Printf("List %s length %d is within max size %d, no trimming needed", 
+		log.Printf("List %s length %d is within max size %d, no trimming needed",
 			listConfig.Name, length, listConfig.MaxSize)
 		return nil
 	}
@@ -147,14 +147,14 @@ func trimList(ctx context.Context, rdb *redis.Client, listConfig ListConfig) err
 	// This removes old items from the head
 	start := -listConfig.MaxSize
 	end := int64(-1)
-	
+
 	if err := rdb.LTrim(ctx, listConfig.Name, start, end).Err(); err != nil {
 		return fmt.Errorf("failed to trim list: %w", err)
 	}
 
 	trimmedCount := length - listConfig.MaxSize
-	log.Printf("Trimmed list %s: removed %d old items (was %d, now %d)", 
+	log.Printf("Trimmed list %s: removed %d old items (was %d, now %d)",
 		listConfig.Name, trimmedCount, length, listConfig.MaxSize)
-	
+
 	return nil
 }
