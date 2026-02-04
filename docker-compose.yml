@@ -5,19 +5,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    read_only: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     image: henry8th:latest
     container_name: henry8th
-    restart: unless-stopped
+    restart: on-failure:10
     environment:
       - CONFIG_PATH=/config.yaml
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       # Mount custom config if needed
       - ./config.yaml:/config.yaml:ro
-    networks:
-      - default
 
-# Note: Redis server is external and not included in this compose file
-# Configure the Redis connection in config.yaml to point to your external Redis instance
-networks:
-  default:
-    driver: bridge

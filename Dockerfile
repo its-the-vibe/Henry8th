@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25.6-alpine AS builder
 
 WORKDIR /build
 
@@ -13,7 +13,7 @@ RUN go mod download
 COPY main.go ./
 
 # Build the binary with static linking
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-w -s" -o henry8th .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o henry8th .
 
 # Runtime stage using scratch
 FROM scratch
