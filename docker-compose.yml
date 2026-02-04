@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  henry8th:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: henry8th:latest
+    container_name: henry8th
+    restart: unless-stopped
+    environment:
+      - CONFIG_PATH=/config.yaml
+    volumes:
+      # Mount custom config if needed
+      - ./config.yaml:/config.yaml:ro
+    networks:
+      - default
+
+# Note: Redis server is external and not included in this compose file
+# Configure the Redis connection in config.yaml to point to your external Redis instance
+networks:
+  default:
+    driver: bridge
