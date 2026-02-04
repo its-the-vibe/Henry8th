@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  henry8th:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    read_only: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    image: henry8th:latest
+    container_name: henry8th
+    restart: on-failure:10
+    environment:
+      - CONFIG_PATH=/config.yaml
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      # Mount custom config if needed
+      - ./config.yaml:/config.yaml:ro
+
