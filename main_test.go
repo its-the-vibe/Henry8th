@@ -214,8 +214,7 @@ lists:
 
 	// Test 2: With environment variable set, should be overridden in main
 	// We can't test the main function directly, but we can verify the logic
-	os.Setenv("REDIS_PASSWORD", "env_password")
-	defer os.Unsetenv("REDIS_PASSWORD")
+	t.Setenv("REDIS_PASSWORD", "env_password")
 
 	// Simulate what happens in main()
 	config, err = loadConfig(tmpfile.Name())
