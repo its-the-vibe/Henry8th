@@ -46,6 +46,11 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
+	// Override Redis password with environment variable if present
+	if envPassword := os.Getenv("REDIS_PASSWORD"); envPassword != "" {
+		config.Redis.Password = envPassword
+	}
+
 	// Parse poll interval
 	pollInterval, err := time.ParseDuration(config.PollInterval)
 	if err != nil {
@@ -129,22 +134,10 @@ func trimLists(ctx context.Context, rdb *redis.Client, lists []ListConfig) {
 }
 
 func trimList(ctx context.Context, rdb *redis.Client, listConfig ListConfig) error {
-	// Get current list length
-	length, err := rdb.LLen(ctx, listConfig.Name).Result()
-	if err != nil {
-		return fmt.Errorf("failed to get list length: %w", err)
-	}
-
-	// If list is within size limit, no trimming needed
-	if length <= listConfig.MaxSize {
-		log.Printf("List %s length %d is within max size %d, no trimming needed",
-			listConfig.Name, length, listConfig.MaxSize)
-		return nil
-	}
-
 	// LTRIM to keep only the most recent items (tail of the list)
 	// Since RPUSH adds to the tail, we want to keep [-(maxSize), -1]
 	// This removes old items from the head
+	// LTRIM is a no-op if the list is smaller than max_size
 	start := -listConfig.MaxSize
 	end := int64(-1)
 
@@ -152,9 +145,7 @@ func trimList(ctx context.Context, rdb *redis.Client, listConfig ListConfig) err
 		return fmt.Errorf("failed to trim list: %w", err)
 	}
 
-	trimmedCount := length - listConfig.MaxSize
-	log.Printf("Trimmed list %s: removed %d old items (was %d, now %d)",
-		listConfig.Name, trimmedCount, length, listConfig.MaxSize)
+	log.Printf("Trimmed list %s to max size %d", listConfig.Name, listConfig.MaxSize)
 
 	return nil
 }

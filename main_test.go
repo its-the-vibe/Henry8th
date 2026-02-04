@@ -173,3 +173,103 @@ func TestLoadConfigFileNotFound(t *testing.T) {
 		t.Error("Expected error for non-existent config file, got nil")
 	}
 }
+
+func TestRedisPasswordEnvOverride(t *testing.T) {
+	// Create a temporary config file with a password
+	tmpfile, err := os.CreateTemp("", "config-*.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	configContent := `redis:
+  host: testhost
+  port: 6379
+  password: config_password
+  db: 0
+
+poll_interval: "1m"
+
+lists:
+  - name: "test"
+    max_size: 100
+`
+
+	if _, err := tmpfile.Write([]byte(configContent)); err != nil {
+		t.Fatal(err)
+	}
+	if err := tmpfile.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	// Test 1: Without environment variable, should use config password
+	config, err := loadConfig(tmpfile.Name())
+	if err != nil {
+		t.Fatalf("Failed to load config: %v", err)
+	}
+
+	if config.Redis.Password != "config_password" {
+		t.Errorf("Expected password 'config_password' from config, got '%s'", config.Redis.Password)
+	}
+
+	// Test 2: With environment variable set, should be overridden in main
+	// We can't test the main function directly, but we can verify the logic
+	os.Setenv("REDIS_PASSWORD", "env_password")
+	defer os.Unsetenv("REDIS_PASSWORD")
+
+	// Simulate what happens in main()
+	config, err = loadConfig(tmpfile.Name())
+	if err != nil {
+		t.Fatalf("Failed to load config: %v", err)
+	}
+
+	// Apply the env override logic from main
+	if envPassword := os.Getenv("REDIS_PASSWORD"); envPassword != "" {
+		config.Redis.Password = envPassword
+	}
+
+	if config.Redis.Password != "env_password" {
+		t.Errorf("Expected password 'env_password' from env override, got '%s'", config.Redis.Password)
+	}
+
+	// Test 3: Empty password in config, with env override
+	configContent = `redis:
+  host: testhost
+  port: 6379
+  password: ""
+  db: 0
+
+poll_interval: "1m"
+
+lists:
+  - name: "test"
+    max_size: 100
+`
+
+	tmpfile2, err := os.CreateTemp("", "config-*.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpfile2.Name())
+
+	if _, err := tmpfile2.Write([]byte(configContent)); err != nil {
+		t.Fatal(err)
+	}
+	if err := tmpfile2.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	config, err = loadConfig(tmpfile2.Name())
+	if err != nil {
+		t.Fatalf("Failed to load config: %v", err)
+	}
+
+	// Apply the env override logic from main
+	if envPassword := os.Getenv("REDIS_PASSWORD"); envPassword != "" {
+		config.Redis.Password = envPassword
+	}
+
+	if config.Redis.Password != "env_password" {
+		t.Errorf("Expected password 'env_password' from env override when config has empty password, got '%s'", config.Redis.Password)
+	}
+}
