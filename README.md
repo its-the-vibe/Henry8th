@@ -1,4 +1,7 @@
 # Henry8th
+
+<img src="https://github.com/its-the-vibe/Henry8th/actions/workflows/ci.yaml/badge.svg">
+
 A simple service in Go that will trim the head of Redis Lists to maintain a configured maximum size.
 
 ## Overview
@@ -73,6 +76,17 @@ docker-compose up -d
 ```bash
 docker run -v $(pwd)/config.yaml:/config.yaml:ro henry8th:latest
 ```
+
+## Makefile Targets
+
+The project includes a `Makefile` to standardize common development tasks:
+
+| Target | Description |
+|--------|-------------|
+| `make build` | Compile the Go project |
+| `make test` | Run unit tests with coverage |
+| `make lint` | Run `golangci-lint` |
+| `make ci` | Run build, test, and lint (used by CI) |
 
 ## Running Locally
 

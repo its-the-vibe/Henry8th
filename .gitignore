@@ -8,6 +8,7 @@
 *.so
 *.dylib
 henry8th
+Henry8th
 
 # Test binary, built with `go test -c`
 *.test
