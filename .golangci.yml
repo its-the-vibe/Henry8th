@@ -1,0 +1,44 @@
+version: "2"
+run:
+  tests: true
+linters:
+  enable:
+    - asasalint
+    - bodyclose
+    - dogsled
+    - dupl
+    - forbidigo
+    - gocritic
+    - gocyclo
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - noctx
+    - prealloc
+    - revive
+    - rowserrcheck
+    - unparam
+    - wastedassign
+    - whitespace
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

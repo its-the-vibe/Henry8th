@@ -63,14 +63,15 @@ func main() {
 		Password: config.Redis.Password,
 		DB:       config.Redis.DB,
 	})
-	defer rdb.Close()
 
 	ctx := context.Background()
 
 	// Test Redis connection
 	if err := rdb.Ping(ctx).Err(); err != nil {
+		rdb.Close()
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
+	defer rdb.Close()
 	log.Println("Successfully connected to Redis")
 
 	// Setup graceful shutdown
