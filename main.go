@@ -142,6 +142,10 @@ func trimList(ctx context.Context, rdb *redis.Client, listConfig ListConfig) err
 	start := -listConfig.MaxSize
 	end := int64(-1)
 
+	if rdb.LLen(ctx, listConfig.Name).Val() <= listConfig.MaxSize {
+		return nil
+	}
+
 	if err := rdb.LTrim(ctx, listConfig.Name, start, end).Err(); err != nil {
 		return fmt.Errorf("failed to trim list: %w", err)
 	}
