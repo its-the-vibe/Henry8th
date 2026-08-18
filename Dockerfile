@@ -1,5 +1,8 @@
 # Build stage
-FROM golang:1.26.6-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26.6-alpine AS builder
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /build
 
@@ -13,10 +16,10 @@ RUN go mod download
 COPY main.go ./
 
 # Build the binary with static linking
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o henry8th .
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -ldflags="-s -w" -o henry8th .
 
-# Runtime stage using scratch
-FROM scratch
+# Runtime stage (distroless)
+FROM gcr.io/distroless/static-debian13:nonroot
 
 # Copy the binary from builder
 COPY --from=builder /build/henry8th /henry8th
