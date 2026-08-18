@@ -8,7 +8,6 @@ services:
     read_only: true
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    image: henry8th:latest
     container_name: henry8th
     restart: on-failure:10
     environment:
